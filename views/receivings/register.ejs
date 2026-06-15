@@ -66,7 +66,7 @@
                                 <input type="number" name="discount_percent" step="1" value="<%= item.discount_percent %>" class="form-control input-sm inline-edit" data-index="<%= index %>" style="width: 60px; height: 26px;">
                             </td>
                             <td style="text-align: right; font-weight: bold; vertical-align: middle;">
-                                $<%= itemTotal.toFixed(2) %>
+                                <%= config.currency_symbol || '₹' %><%= itemTotal.toFixed(2) %>
                             </td>
                         </tr>
                     <% }); %>
@@ -118,9 +118,9 @@
     <!-- Totals panel -->
     <div class="panel panel-default" style="border-radius: 8px;">
         <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between" style="background-color: #f7f9fa; font-size: 16px;">
+                <li class="list-group-item d-flex justify-content-between" style="background-color: #f7f9fa; font-size: 16px;">
                 <span>Total:</span>
-                <strong class="pull-right text-primary">$<%= total.toFixed(2) %></strong>
+                <strong class="pull-right text-primary"><%= config.currency_symbol || '₹' %><%= total.toFixed(2) %></strong>
             </li>
         </ul>
     </div>

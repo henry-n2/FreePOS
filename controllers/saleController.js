@@ -464,7 +464,7 @@ exports.postComplete = async (req, res) => {
       }
     }
 
-    // 3. Award customer points (e.g. 1 point per $10 spent)
+    // 3. Award customer points (e.g. 1 point per ₹10 spent)
     if (cart.customer_id) {
       const totalCost = cart.items.reduce((sum, item) => sum + (item.unit_price * item.quantity * (1 - item.discount_percent / 100)), 0);
       const pointsEarned = Math.floor(totalCost / 10);

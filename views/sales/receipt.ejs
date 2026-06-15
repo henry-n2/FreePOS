@@ -118,8 +118,8 @@
                             <% } %>
                         </td>
                         <td class="text-right"><%= line.quantity_purchased %></td>
-                        <td class="text-right">$<%= line.item_unit_price.toFixed(2) %></td>
-                        <td class="text-right">$<%= lineSub.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= line.item_unit_price.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= lineSub.toFixed(2) %></td>
                     </tr>
                 <% }); %>
             </tbody>
@@ -130,7 +130,7 @@
                 <tbody>
                     <tr>
                         <td>Subtotal:</td>
-                        <td class="text-right">$<%= subtotal.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= subtotal.toFixed(2) %></td>
                     </tr>
                     <% 
                       let taxTotal = 0;
@@ -140,12 +140,12 @@
                     %>
                         <tr>
                             <td><%= tax.name %> (<%= tax.percent %>%):</td>
-                            <td class="text-right">$<%= taxAmt.toFixed(2) %></td>
+                                <td class="text-right"><%= config.currency_symbol || '₹' %><%= taxAmt.toFixed(2) %></td>
                         </tr>
                     <% }); %>
                     <tr style="font-weight: bold; font-size: 14px; color: <%= config.invoice_primary_color || '#2c3e50' %>;">
                         <td>TOTAL:</td>
-                        <td class="text-right">$<%= (subtotal + taxTotal).toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= (subtotal + taxTotal).toFixed(2) %></td>
                     </tr>
                 </tbody>
             </table>
@@ -161,7 +161,7 @@
                     %>
                         <tr>
                             <td>Payment (<%= p.payment_type %>):</td>
-                            <td class="text-right">$<%= p.payment_amount.toFixed(2) %></td>
+                            <td class="text-right"><%= config.currency_symbol || '₹' %><%= p.payment_amount.toFixed(2) %></td>
                         </tr>
                     <% }); %>
                     <% 
@@ -171,7 +171,7 @@
                     %>
                         <tr style="font-weight: bold;">
                             <td>Change Due:</td>
-                            <td class="text-right">$<%= change.toFixed(2) %></td>
+                            <td class="text-right"><%= config.currency_symbol || '₹' %><%= change.toFixed(2) %></td>
                         </tr>
                     <% } %>
                 </tbody>

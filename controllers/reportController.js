@@ -83,21 +83,21 @@ exports.getReport = async (req, res) => {
 
         reportData.rows.push([
           date,
-          `$${val.subtotal.toFixed(2)}`,
-          `$${val.tax.toFixed(2)}`,
-          `$${rowTotal.toFixed(2)}`,
-          `$${val.cost.toFixed(2)}`,
-          `$${profit.toFixed(2)}`
+          `₹${val.subtotal.toFixed(2)}`,
+          `₹${val.tax.toFixed(2)}`,
+          `₹${rowTotal.toFixed(2)}`,
+          `₹${val.cost.toFixed(2)}`,
+          `₹${profit.toFixed(2)}`
         ]);
       }
 
       const totalAmount = subtotalTotal + taxTotal;
-      reportData.summary = {
-        'Total Subtotal': `$${subtotalTotal.toFixed(2)}`,
-        'Total Tax': `$${taxTotal.toFixed(2)}`,
-        'Total Sales': `$${totalAmount.toFixed(2)}`,
-        'Total Cost': `$${costTotal.toFixed(2)}`,
-        'Total Profit': `$${(totalAmount - costTotal).toFixed(2)}`
+        reportData.summary = {
+        'Total Subtotal': `₹${subtotalTotal.toFixed(2)}`,
+        'Total Tax': `₹${taxTotal.toFixed(2)}`,
+        'Total Sales': `₹${totalAmount.toFixed(2)}`,
+        'Total Cost': `₹${costTotal.toFixed(2)}`,
+        'Total Profit': `₹${(totalAmount - costTotal).toFixed(2)}`
       };
 
     } else if (report_type === 'low_inventory') {
@@ -137,13 +137,13 @@ exports.getReport = async (req, res) => {
           e.date.toLocaleDateString(),
           e.category ? e.category.name : 'Uncategorized',
           e.description,
-          `$${e.amount.toFixed(2)}`,
+          `₹${e.amount.toFixed(2)}`,
           e.payment_type
         ]);
       });
 
       reportData.summary = {
-        'Total Expenses': `$${totalExpenses.toFixed(2)}`
+        'Total Expenses': `₹${totalExpenses.toFixed(2)}`
       };
     }
 

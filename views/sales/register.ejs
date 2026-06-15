@@ -113,7 +113,7 @@
                             </h5>
                             <p style="margin: 0; font-size: 10px; color: #888; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= item.category %></p>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-                                <span class="label label-primary" style="font-size: 10px; background-color: #2c3e50;"><%= config.currency_symbol || '$' %><%= item.unit_price.toFixed(2) %></span>
+                                <span class="label label-primary" style="font-size: 10px; background-color: #2c3e50;"><%= config.currency_symbol || '₹' %><%= item.unit_price.toFixed(2) %></span>
                                 <% 
                                   const totalQty = item.quantities ? item.quantities.reduce((sum, q) => sum + (q.quantity || 0), 0) : 0;
                                   const isLowStock = totalQty <= (item.reorder_level || 0);
@@ -177,7 +177,7 @@
                                     <input type="number" name="discount_percent" step="1" value="<%= item.discount_percent %>" class="inline-edit-input inline-edit" data-index="<%= index %>">
                                 </td>
                                 <td style="text-align: right; font-weight: bold; vertical-align: middle; font-size: 11px;">
-                                    $<%= itemTotal.toFixed(2) %>
+                                    <%= config.currency_symbol || '₹' %><%= itemTotal.toFixed(2) %>
                                 </td>
                             </tr>
                         <% }); %>
@@ -236,15 +236,15 @@
         <ul class="list-group" style="margin-bottom:0;">
             <li class="list-group-item" style="padding: 6px 12px; font-size: 11px;">
                 Subtotal:
-                <strong class="pull-right">$<%= subtotal.toFixed(2) %></strong>
+                <strong class="pull-right"><%= config.currency_symbol || '₹' %><%= subtotal.toFixed(2) %></strong>
             </li>
             <li class="list-group-item" style="padding: 6px 12px; font-size: 11px;">
                 Tax:
-                <strong class="pull-right">$<%= taxTotal.toFixed(2) %></strong>
+                <strong class="pull-right"><%= config.currency_symbol || '₹' %><%= taxTotal.toFixed(2) %></strong>
             </li>
             <li class="list-group-item" style="background-color: #fcfcfc; padding: 8px 12px; font-size: 15px; font-weight: bold;">
                 Total Due:
-                <strong class="pull-right text-primary">$<%= total.toFixed(2) %></strong>
+                <strong class="pull-right text-primary"><%= config.currency_symbol || '₹' %><%= total.toFixed(2) %></strong>
             </li>
         </ul>
     </div>
@@ -252,7 +252,7 @@
     <!-- Payments Section -->
     <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px;">
         <div class="panel-heading" style="padding: 6px 12px; background: #eee; font-weight: bold; font-size: 11px;">
-            <i class="glyphicon glyphicon-usd"></i> Payments
+            <i class="fa fa-inr" aria-hidden="true"></i> Payments
         </div>
         <div class="panel-body" style="padding: 10px;">
             <% if (cart.payments.length > 0) { %>
@@ -261,7 +261,7 @@
                         <% cart.payments.forEach((p, idx) => { %>
                             <tr>
                                 <td><%= p.payment_type %></td>
-                                <td style="text-align: right; font-weight: bold;">$<%= p.payment_amount.toFixed(2) %></td>
+                                <td style="text-align: right; font-weight: bold;">₹<%= p.payment_amount.toFixed(2) %></td>
                                 <td style="text-align: center; width: 20px;"><a href="/sales/delete_payment/<%= idx %>" class="text-danger"><i class="glyphicon glyphicon-remove"></i></a></td>
                             </tr>
                         <% }); %>
@@ -282,7 +282,7 @@
                 </div>
                 <div class="form-group" style="width: 48%;">
                     <div class="input-group input-group-sm" style="width: 100%;">
-                        <span class="input-group-addon">$</span>
+                        <span class="input-group-addon"><%= config.currency_symbol || '₹' %></span>
                         <input type="number" name="payment_amount" step="0.01" class="form-control" placeholder="Amount" value="<%= amountDue > 0 ? amountDue.toFixed(2) : '0.00' %>" required>
                     </div>
                 </div>

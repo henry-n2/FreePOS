@@ -92,13 +92,13 @@
                     <tr>
                         <td><%= line.item.name %></td>
                         <td class="text-right"><%= line.quantity_purchased %></td>
-                        <td class="text-right">$<%= line.item_cost_price.toFixed(2) %></td>
-                        <td class="text-right">$<%= lineTotal.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= line.item_cost_price.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= lineTotal.toFixed(2) %></td>
                     </tr>
                 <% }); %>
                 <tr style="font-weight: bold; border-top: 1px double #000;">
                     <td colspan="3">TOTAL:</td>
-                    <td class="text-right">$<%= total.toFixed(2) %></td>
+                    <td class="text-right"><%= config.currency_symbol || '₹' %><%= total.toFixed(2) %></td>
                 </tr>
                 <tr>
                     <td colspan="3">Payment Type:</td>

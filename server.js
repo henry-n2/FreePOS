@@ -41,7 +41,7 @@ app.use(session({
 // Static Folders
 app.use(express.static(path.join(__dirname, 'public')));
 // Re-use original assets from upper directory if needed, or define local ones
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Helper middleware to make config and user details available in views
 app.use(async (req, res, next) => {

@@ -114,10 +114,10 @@
                                 <br><small class="text-muted"><%= line.description %></small>
                             <% } %>
                         </td>
-                        <td class="text-right">$<%= line.item_unit_price.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= line.item_unit_price.toFixed(2) %></td>
                         <td class="text-right"><%= line.quantity_purchased %></td>
                         <td class="text-right"><%= line.discount_percent %>%</td>
-                        <td class="text-right">$<%= lineSub.toFixed(2) %></td>
+                        <td class="text-right"><%= config.currency_symbol || '₹' %><%= lineSub.toFixed(2) %></td>
                     </tr>
                 <% }); %>
             </tbody>
@@ -135,7 +135,7 @@
                     <tbody>
                         <tr>
                             <td><strong>Subtotal:</strong></td>
-                            <td>$<%= subtotal.toFixed(2) %></td>
+                            <td><%= config.currency_symbol || '₹' %><%= subtotal.toFixed(2) %></td>
                         </tr>
                         <% 
                           let taxTotal = 0;
@@ -145,12 +145,12 @@
                         %>
                             <tr>
                                 <td><strong><%= tax.name %> (<%= tax.percent %>%):</strong></td>
-                                <td>$<%= taxAmt.toFixed(2) %></td>
+                                <td><%= config.currency_symbol || '₹' %><%= taxAmt.toFixed(2) %></td>
                             </tr>
                         <% }); %>
                         <tr style="font-size: 16px; font-weight: bold; background-color: #f7f9fa; color: <%= config.invoice_primary_color || '#2c3e50' %>;">
                             <td><strong>Total Amount:</strong></td>
-                            <td>$<%= (subtotal + taxTotal).toFixed(2) %></td>
+                            <td><%= config.currency_symbol || '₹' %><%= (subtotal + taxTotal).toFixed(2) %></td>
                         </tr>
                     </tbody>
                 </table>

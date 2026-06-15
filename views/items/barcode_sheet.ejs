@@ -76,7 +76,7 @@
                 <div class="barcode-label">
                     <p class="barcode-name"><%= item.name %></p>
                     <svg class="barcode-svg" data-value="<%= item.item_number %>"></svg>
-                    <p class="barcode-price">$<%= item.unit_price.toFixed(2) %></p>
+                    <p class="barcode-price"><%= config.currency_symbol || '₹' %><%= item.unit_price.toFixed(2) %></p>
                 </div>
             <% } %>
         <% }); %>

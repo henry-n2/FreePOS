@@ -232,7 +232,7 @@ exports.getSuggest = async (req, res) => {
     const items = await Item.find(query).limit(10);
     const suggestions = items.map(item => ({
       value: item._id,
-      label: `${item.name} (${item.item_number || 'No SKU'}) - Price: $${item.unit_price}`,
+      label: `${item.name} (${item.item_number || 'No SKU'}) - Price: ₹${item.unit_price}`,
       name: item.name,
       unit_price: item.unit_price,
       cost_price: item.cost_price,

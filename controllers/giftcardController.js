@@ -123,7 +123,7 @@ exports.getSuggest = async (req, res) => {
     const giftcards = await Giftcard.find(query).limit(10);
     const suggestions = giftcards.map(g => ({
       value: g._id,
-      label: `Giftcard #${g.giftcard_number} ($${g.value})`,
+      label: `Giftcard #${g.giftcard_number} (₹${g.value})`,
       giftcard_number: g.giftcard_number,
       value_amount: g.value,
       is_giftcard: true

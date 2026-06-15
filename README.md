@@ -23,8 +23,6 @@ Perfect for small to medium-sized retail businesses looking for a customizable, 
 
 ## ✨ Key Features
 
-✨ Key Features
-
 - 🔐 **User Authentication** - Role-based access control with secure authentication
 - 👥 **Customer Management** - Manage customer profiles and transaction history
 - 📦 **Inventory Management** - Track items, suppliers, and stock locations
@@ -36,9 +34,27 @@ Perfect for small to medium-sized retail businesses looking for a customizable, 
 - 🎨 **Theming & Customization** - Configurable application settings
 - 📱 **Responsive UI** - Server-rendered views with Bootstrap styling
 
-## 📋 Requirements
+## 📸 Screenshots
 
-📋 Requirements
+<details>
+<summary><strong>View Application Screenshots</strong></summary>
+<br>
+
+| Sales Panel | Billing & Invoicing |
+|:---:|:---:|
+| <img src="Snapshots/Sales_panel.jpeg" width="400" alt="Sales Panel"> | <img src="Snapshots/Billing.png" width="400" alt="Billing"> |
+
+| Items Management | Invoice Generation |
+|:---:|:---:|
+| <img src="Snapshots/Iteams.png" width="400" alt="Items Management"> | <img src="Snapshots/Invoice_generation.png" width="400" alt="Invoice Generation"> |
+
+| Sales Report | Light Mode Theme |
+|:---:|:---:|
+| <img src="Snapshots/Sale_Report.png" width="400" alt="Sales Report"> | <img src="Snapshots/Light_Mode.jpg" width="400" alt="Light Mode Theme"> |
+
+</details>
+
+## 📋 Requirements
 
 - **Node.js** 18+ (or a compatible modern Node.js runtime)
 - **npm** (Node Package Manager)
@@ -60,8 +76,6 @@ npm install
 ```
 
 ## ⚙️ Configuration
-
-⚙️ Configuration
 
 FreePOS reads environment variables from your shell or a `.env` file via `dotenv`.
 
@@ -144,8 +158,6 @@ freepos/
 ```
 
 ## 📦 Dependencies
-
-📦 Dependencies
 
 - `express` — Web framework for Node.js
 - `ejs` — Server-side templating engine
