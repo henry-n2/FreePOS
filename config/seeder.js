@@ -6,13 +6,13 @@ const seedDB = async () => {
   try {
     // 1. Seed default app configurations
     const defaultConfig = {
-      address: '123 Nowhere street',
+      address: 'West Bengal, India',
       company: 'FreePOS',
       default_tax_rate: '8',
-      email: 'changeme@example.com',
-      phone: '555-555-5555',
+      email: 'henry-n2@example.com',
+      phone: '+913939399320',
       return_policy: 'Test Return Policy',
-      timezone: 'America/New_York',
+        timezone: 'Asia/Kolkata',
       currency_symbol: '₹',
       dateformat: 'MM/DD/YYYY',
       timeformat: 'HH:mm:ss',
@@ -69,12 +69,12 @@ const seedDB = async () => {
 
       // Note: pre-save hook will hash 'pointofsale'
       await Employee.create({
-        first_name: 'John',
-        last_name: 'Doe',
+        first_name: 'Ujjal',
+        last_name: 'Bhattacharya',
         username: 'admin',
-        password: 'pointofsale',
-        email: 'changeme@example.com',
-        phone_number: '555-555-5555',
+        password: 'admin',
+        email: 'henry-n2@example.com',
+        phone_number: '+913939399320',
         grants: grants
       });
       console.log('Admin user seeded: admin / pointofsale');

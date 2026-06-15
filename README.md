@@ -77,7 +77,7 @@ On first startup, FreePOS seeds default configuration and an admin user.
 Default admin credentials:
 
 - Username: `admin`
-- Password: `pointofsale`
+- Password: `admin`
 
 The seeded default company name is `FreePOS`.
 
