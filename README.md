@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="FreePOS2.png" alt="FreePOS Logo" width="150" height="150">
+  <img src="public\FreePOS2.png" alt="FreePOS Logo" width="150" height="150">
   
   # FreePOS
   
