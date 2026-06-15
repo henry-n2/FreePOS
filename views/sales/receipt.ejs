@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Sales Receipt #<%= sale.invoice_number %></title>
+    <link rel="icon" href="/FreePOS_favicon.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css">
     <style>
         body {
@@ -55,7 +56,10 @@
     <div id="receipt-wrapper">
         <div class="header">
             <% if (config.invoice_show_logo !== '0') { %>
-                <h3><strong><%= config.company || 'FreePOS' %></strong></h3>
+                <div style="margin-bottom: 10px; text-align: center;">
+                    <img src="/FreePOS2.png" alt="<%= config.company || 'FreePOS' %>" style="max-height: 40px; margin-bottom: 8px;">
+                    <h3 style="margin: 5px 0;"><strong><%= config.company || 'FreePOS' %></strong></h3>
+                </div>
             <% } %>
             <p><%= config.address || '123 Nowhere Street' %></p>
             <p>Phone: <%= config.phone || '555-555-5555' %></p>
