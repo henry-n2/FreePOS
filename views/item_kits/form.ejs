@@ -1,0 +1,137 @@
+<div class="modal-header modal-header-custom">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white; opacity: 0.8;">&times;</button>
+    <h4 class="modal-title" id="myModalLabel"><%= id === '-1' ? 'New Item Kit' : 'Edit Item Kit' %></h4>
+</div>
+
+<form id="itemkit-form" action="/item_kits/save/<%= id %>" method="POST" class="form-horizontal">
+    <div class="modal-body">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Kit Name:</label>
+            <div class="col-sm-9">
+                <input type="text" name="name" class="form-control" required value="<%= kit.name || '' %>">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Kit Number:</label>
+            <div class="col-sm-9">
+                <input type="text" name="item_kit_number" class="form-control" value="<%= kit.item_kit_number || '' %>">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Description:</label>
+            <div class="col-sm-9">
+                <textarea name="description" class="form-control" rows="3"><%= kit.description || '' %></textarea>
+            </div>
+        </div>
+
+        <hr>
+        <h4>Add Component Items</h4>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Search Item:</label>
+            <div class="col-sm-9">
+                <input type="text" id="item-search" class="form-control" placeholder="Type item name or scan barcode...">
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped" id="kit-items-table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th style="width: 150px;">Quantity</th>
+                    <th style="width: 50px;">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                  const kitItems = kit.items || [];
+                  kitItems.forEach(ki => { 
+                %>
+                    <tr class="kit-item-row" data-id="<%= ki.item._id %>">
+                        <td>
+                            <%= ki.item.name %>
+                            <input type="hidden" name="kit_item_ids" value="<%= ki.item._id %>">
+                        </td>
+                        <td>
+                            <input type="number" step="0.001" name="kit_item_qtys" class="form-control input-sm" value="<%= ki.quantity %>" required min="0.001">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-xs btn-danger remove-kit-item"><i class="glyphicon glyphicon-trash"></i></button>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+<script>
+  $(document).ready(function() {
+    // Autocomplete for searching items to add to the kit
+    $('#item-search').autocomplete({
+      source: '/items/suggest',
+      minLength: 2,
+      select: function(event, ui) {
+        const item = ui.item;
+        
+        // Check if item already added
+        if ($(`#kit-items-table tbody tr[data-id="${item.value}"]`).length > 0) {
+          show_feedback('danger', 'Item already added to this kit', 'Error');
+          $('#item-search').val('');
+          return false;
+        }
+
+        const rowHtml = `
+          <tr class="kit-item-row" data-id="${item.value}">
+              <td>
+                  ${item.name}
+                  <input type="hidden" name="kit_item_ids" value="${item.value}">
+              </td>
+              <td>
+                  <input type="number" step="0.001" name="kit_item_qtys" class="form-control input-sm" value="1" required min="0.001">
+              </td>
+              <td>
+                  <button type="button" class="btn btn-xs btn-danger remove-kit-item"><i class="glyphicon glyphicon-trash"></i></button>
+              </td>
+          </tr>
+        `;
+        $('#kit-items-table tbody').append(rowHtml);
+        $('#item-search').val('');
+        return false;
+      }
+    });
+
+    // Remove component item row
+    $(document).on('click', '.remove-kit-item', function() {
+      $(this).closest('tr').remove();
+    });
+
+    // Submit form via AJAX
+    $('#itemkit-form').submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $('#myModal').modal('hide');
+            $('#table').bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        },
+        error: function(err) {
+          show_feedback('danger', 'Server error saving item kit', 'Error');
+        }
+      });
+    });
+  });
+</script>

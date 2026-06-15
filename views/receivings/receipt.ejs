@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Receiving Receipt #<%= receiving._id.toString().substring(18) ?></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css">
+    <style>
+        body {
+            background-color: white;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+        }
+        #receipt-wrapper {
+            max-width: 500px;
+            margin: 0 auto;
+            border: 1px dashed #ccc;
+            padding: 15px;
+        }
+        .header, .footer {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            #receipt-wrapper {
+                border: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print text-center" style="margin-bottom: 20px;">
+        <button onclick="window.print()" class="btn btn-primary"><i class="glyphicon glyphicon-print"></i> Print Receipt</button>
+        <a href="/receivings" class="btn btn-default"><i class="glyphicon glyphicon-shopping-cart"></i> Return to Acquisitions</a>
+    </div>
+
+    <div id="receipt-wrapper">
+        <div class="header">
+            <h3><strong><%= config.company || 'FreePOS' %></strong></h3>
+            <h4>Receiving Receipt</h4>
+            <p><%= config.address || '123 Nowhere Street' %></p>
+        </div>
+
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td>Date:</td>
+                    <td class="text-right"><%= receiving.receiving_time.toLocaleString() %></td>
+                </tr>
+                <tr>
+                    <td>Employee:</td>
+                    <td class="text-right"><%= receiving.employee ? `${receiving.employee.first_name} ${receiving.employee.last_name}` : 'Unknown' %></td>
+                </tr>
+                <% if (receiving.supplier) { %>
+                    <tr>
+                        <td>Supplier:</td>
+                        <td class="text-right"><strong><%= receiving.supplier.company_name %></strong></td>
+                    </tr>
+                <% } %>
+                <% if (receiving.reference) { %>
+                    <tr>
+                        <td>Reference #:</td>
+                        <td class="text-right"><%= receiving.reference %></td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <table class="table" style="border-top: 1px dashed #000;">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="text-right">Qty</th>
+                    <th class="text-right">Cost Price</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                  let total = 0;
+                  receiving.items.forEach(line => {
+                    const lineTotal = line.item_cost_price * line.quantity_purchased * (1 - line.discount_percent / 100);
+                    total += lineTotal;
+                %>
+                    <tr>
+                        <td><%= line.item.name %></td>
+                        <td class="text-right"><%= line.quantity_purchased %></td>
+                        <td class="text-right">$<%= line.item_cost_price.toFixed(2) %></td>
+                        <td class="text-right">$<%= lineTotal.toFixed(2) %></td>
+                    </tr>
+                <% }); %>
+                <tr style="font-weight: bold; border-top: 1px double #000;">
+                    <td colspan="3">TOTAL:</td>
+                    <td class="text-right">$<%= total.toFixed(2) %></td>
+                </tr>
+                <tr>
+                    <td colspan="3">Payment Type:</td>
+                    <td class="text-right"><%= receiving.payment_type %></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <% if (receiving.comment) { %>
+            <div style="border-top: 1px dashed #000; padding-top: 5px;">
+                <p><strong>Comments:</strong> <%= receiving.comment %></p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

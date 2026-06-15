@@ -1,0 +1,338 @@
+<div class="modal-header modal-header-custom">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white; opacity: 0.8;">&times;</button>
+    <h4 class="modal-title" id="myModalLabel"><%= id === '-1' ? 'New Item' : 'Edit Item' %></h4>
+</div>
+
+<form id="item-form" action="/items/save/<%= id %>" method="POST" enctype="multipart/form-data" class="form-horizontal">
+    <div class="modal-body">
+        <ul class="nav nav-tabs" id="item-tabs" role="tablist">
+            <li class="active"><a href="#item-info" data-toggle="tab">Item Info</a></li>
+            <li><a href="#item-custom" data-toggle="tab">Custom Fields</a></li>
+            <li><a href="#item-taxes" data-toggle="tab">Taxes</a></li>
+            <li><a href="#item-stock" data-toggle="tab">Stock Quantities</a></li>
+        </ul>
+
+        <div class="tab-content" style="margin-top: 20px;">
+            <!-- Item Info Tab -->
+            <div class="tab-pane active" id="item-info">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Item Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="name" class="form-control" required value="<%= item.name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Category:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="category" class="form-control" required value="<%= item.category || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">UPC/EAN/SKU:</label>
+                    <div class="col-sm-9">
+                        <div class="input-group">
+                            <input type="text" name="item_number" id="item-number-input" class="form-control" value="<%= item.item_number || '' %>" placeholder="Scan or type barcode number">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" id="generate-barcode-btn" title="Auto-generate Barcode">
+                                    <span class="glyphicon glyphicon-refresh"></span> Auto
+                                </button>
+                            </span>
+                        </div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <svg id="barcode-canvas" style="max-height: 80px; display: block; margin: 0 auto;"></svg>
+                            <button type="button" class="btn btn-xs btn-info" id="download-barcode-btn" style="margin-top: 8px; display: none;" onclick="downloadBarcode()">
+                                <i class="glyphicon glyphicon-download-alt"></i> Download Barcode
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Description:</label>
+                    <div class="col-sm-9">
+                        <textarea name="description" class="form-control" rows="3"><%= item.description || '' %></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Supplier:</label>
+                    <div class="col-sm-9">
+                        <select name="supplier" class="form-control">
+                            <option value="">-- Select Supplier --</option>
+                            <% suppliers.forEach(sup => { %>
+                                <option value="<%= sup._id %>" <%= (item.supplier && item.supplier.toString() === sup._id.toString()) ? 'selected' : '' %>><%= sup.company_name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Cost Price:</label>
+                    <div class="col-sm-9">
+                        <input type="number" step="0.01" name="cost_price" class="form-control" required value="<%= item.cost_price || 0 %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Unit Price:</label>
+                    <div class="col-sm-9">
+                        <input type="number" step="0.01" name="unit_price" class="form-control" required value="<%= item.unit_price || 0 %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Reorder Level:</label>
+                    <div class="col-sm-9">
+                        <input type="number" step="0.001" name="reorder_level" class="form-control" value="<%= item.reorder_level || 0 %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Receiving Quantity:</label>
+                    <div class="col-sm-9">
+                        <input type="number" step="0.001" name="receiving_quantity" class="form-control" value="<%= item.receiving_quantity || 1 %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Allow Alt Description:</label>
+                    <div class="col-sm-9">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="allow_alt_description" value="1" <%= item.allow_alt_description ? 'checked' : '' %>> Allow alternate description
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Is Serialized:</label>
+                    <div class="col-sm-9">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="is_serialized" value="1" <%= item.is_serialized ? 'checked' : '' %>> Item has serial number
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Item Image:</label>
+                    <div class="col-sm-9">
+                        <input type="file" name="item_image" class="form-control" accept="image/*">
+                        <% if (item.pic_filename) { %>
+                            <div style="margin-top: 10px;">
+                                <img src="/uploads/<%= item.pic_filename %>" style="max-height: 80px; border-radius: 4px;">
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Fields Tab -->
+            <div class="tab-pane" id="item-custom">
+                <% for (let i = 1; i <= 10; i++) { %>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Custom Field <%= i %>:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="custom<%= i %>" class="form-control" value="<%= (item.custom && item.custom['custom' + i]) || '' %>">
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Taxes Tab -->
+            <div class="tab-pane" id="item-taxes">
+                <p class="help-block">Add taxes for this item:</p>
+                <div id="taxes-container">
+                    <% 
+                      const taxes = item.taxes || [];
+                      if (taxes.length === 0) {
+                    %>
+                        <div class="row tax-row" style="margin-bottom: 10px;">
+                            <div class="col-sm-5">
+                                <input type="text" name="tax_names" class="form-control" placeholder="Tax Name (e.g. GST)">
+                            </div>
+                            <div class="col-sm-5">
+                                <input type="number" step="0.001" name="tax_percents" class="form-control" placeholder="Percent (e.g. 5)">
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-danger remove-tax-row"><i class="glyphicon glyphicon-minus"></i></button>
+                            </div>
+                        </div>
+                    <% 
+                      } else {
+                        taxes.forEach(tax => { 
+                    %>
+                        <div class="row tax-row" style="margin-bottom: 10px;">
+                            <div class="col-sm-5">
+                                <input type="text" name="tax_names" class="form-control" value="<%= tax.name %>" placeholder="Tax Name">
+                            </div>
+                            <div class="col-sm-5">
+                                <input type="number" step="0.001" name="tax_percents" class="form-control" value="<%= tax.percent %>" placeholder="Percent">
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-danger remove-tax-row"><i class="glyphicon glyphicon-minus"></i></button>
+                            </div>
+                        </div>
+                    <% 
+                        }); 
+                      }
+                    %>
+                </div>
+                <button type="button" class="btn btn-success" id="add-tax-row"><i class="glyphicon glyphicon-plus"></i> Add Tax Row</button>
+            </div>
+
+            <!-- Stock Quantities Tab -->
+            <div class="tab-pane" id="item-stock">
+                <p class="help-block">Enter stock quantity for each location:</p>
+                <% 
+                  locations.forEach(loc => { 
+                    const qtyObj = item.quantities ? item.quantities.find(q => q.location_id === loc.location_id) : null;
+                    const qty = qtyObj ? qtyObj.quantity : 0;
+                %>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label"><%= loc.location_name %>:</label>
+                        <div class="col-sm-8">
+                            <input type="number" step="0.001" name="qty_<%= loc.location_id %>" class="form-control" value="<%= qty %>">
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+<script>
+  $(document).ready(function() {
+    // Add Tax Row
+    $('#add-tax-row').click(function() {
+      const rowHtml = `
+        <div class="row tax-row" style="margin-bottom: 10px;">
+            <div class="col-sm-5">
+                <input type="text" name="tax_names" class="form-control" placeholder="Tax Name">
+            </div>
+            <div class="col-sm-5">
+                <input type="number" step="0.001" name="tax_percents" class="form-control" placeholder="Percent">
+            </div>
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-danger remove-tax-row"><i class="glyphicon glyphicon-minus"></i></button>
+            </div>
+        </div>
+      `;
+      $('#taxes-container').append(rowHtml);
+    });
+
+    // Remove Tax Row
+    $(document).on('click', '.remove-tax-row', function() {
+      if ($('.tax-row').length > 1) {
+        $(this).closest('.tax-row').remove();
+      } else {
+        $(this).closest('.tax-row').find('input').val('');
+      }
+    });
+
+    // Barcode generation helper
+    function generateBarcode() {
+      const val = $('#item-number-input').val();
+      if (val) {
+        try {
+          JsBarcode("#barcode-canvas", val, {
+            format: "CODE128",
+            lineColor: "<%= config.barcode_line_color || '#000000' %>",
+            width: <%= parseFloat(config.barcode_width) || 2 %>,
+            height: <%= parseFloat(config.barcode_height) || 40 %>,
+            displayValue: <%= config.barcode_display_value === '0' ? 'false' : 'true' %>,
+            fontSize: <%= parseFloat(config.barcode_text_size) || 14 %>,
+            background: "<%= config.barcode_background || '#ffffff' %>"
+          });
+          $('#barcode-canvas').show();
+          $('#download-barcode-btn').show();
+        } catch (err) {
+          console.error(err);
+          $('#barcode-canvas').hide();
+          $('#download-barcode-btn').hide();
+        }
+      } else {
+        $('#barcode-canvas').hide();
+        $('#download-barcode-btn').hide();
+      }
+    }
+
+    // Auto generate if new item and empty
+    if ("<%= id %>" === "-1" && !$('#item-number-input').val()) {
+      // 10-digit random number
+      const autoVal = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+      $('#item-number-input').val(autoVal);
+    }
+    
+    generateBarcode();
+    $('#item-number-input').on('input', generateBarcode);
+
+    $('#generate-barcode-btn').click(function() {
+      const autoVal = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+      $('#item-number-input').val(autoVal).trigger('input');
+    });
+
+    window.downloadBarcode = function() {
+      const svg = document.getElementById('barcode-canvas');
+      if (!svg) return;
+      
+      const svgClone = svg.cloneNode(true);
+      svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      
+      const svgData = new XMLSerializer().serializeToString(svgClone);
+      
+      const canvas = document.createElement('canvas');
+      // Set canvas size (increase for higher resolution)
+      canvas.width = 600;
+      canvas.height = 250;
+      
+      const ctx = canvas.getContext('2d');
+      
+      // White background
+      ctx.fillStyle = '<%= config.barcode_background || "#ffffff" %>';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const img = new Image();
+      img.onload = function() {
+        // Draw image centered on canvas
+        const xOffset = (canvas.width - img.width) / 2;
+        const yOffset = (canvas.height - img.height) / 2;
+        ctx.drawImage(img, xOffset > 0 ? xOffset : 0, yOffset > 0 ? yOffset : 0);
+        
+        const png = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = png;
+        downloadLink.download = 'barcode-' + ($('#item-number-input').val() || 'item') + '.png';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    };
+
+    // Submit form via AJAX
+    $('#item-form').submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      const formData = new FormData(this);
+      
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $('#myModal').modal('hide');
+            $('#table').bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        },
+        error: function(err) {
+          show_feedback('danger', 'Server error saving item', 'Error');
+        }
+      });
+    });
+  });
+</script>

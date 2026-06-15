@@ -1,0 +1,56 @@
+<%- include('partial/header') %>
+
+<div class="col-md-12">
+    <h2 class="text-center" style="margin-top: 20px; margin-bottom: 40px; font-weight: 300;">
+        Welcome to <%= config.company || 'FreePOS' %> Dashboard
+    </h2>
+
+    <div class="row text-center">
+        <% 
+          // FreePOS modules
+          const homeModules = [
+            { id: 'customers', label: 'Customers', icon: 'customers.svg', desc: 'Add, Update, Delete, and Search customers.' },
+            { id: 'items', label: 'Items', icon: 'items.svg', desc: 'Add, Update, Delete, and Search items.' },
+            { id: 'item_kits', label: 'Item Kits', icon: 'item_kits.svg', desc: 'Add, Update, Delete, and Search Item Kits.' },
+            { id: 'suppliers', label: 'Suppliers', icon: 'suppliers.svg', desc: 'Add, Update, Delete, and Search suppliers.' },
+            { id: 'reports', label: 'Reports', icon: 'reports.svg', desc: 'View and generate reports.' },
+            { id: 'receivings', label: 'Receivings', icon: 'receivings.svg', desc: 'Process stock acquisitions.' },
+            { id: 'sales', label: 'Sales', icon: 'sales.svg', desc: 'Process sales and returns.' },
+            { id: 'employees', label: 'Employees', icon: 'employees.svg', desc: 'Add, Update, Delete, and Search employees.' },
+            { id: 'giftcards', label: 'Gift Cards', icon: 'giftcards.svg', desc: 'Add, Update, Delete, and Search giftcards.' },
+            { id: 'expenses', label: 'Expenses', icon: 'expenses.svg', desc: 'Add, Update, Delete, and Search expenses.' },
+            { id: 'config', label: 'Settings', icon: 'config.svg', desc: 'Change the application settings.' }
+          ];
+
+          homeModules.forEach(mod => {
+            // Sales panel only visible for cashier, manager, and admin roles
+            if (mod.id === 'sales' && !['admin', 'manager', 'cashier'].includes(user.role)) {
+              return;
+            }
+            const hasGrant = user.username === 'admin' || 
+                             user.role === 'admin' ||
+                             (mod.id === 'sales' && (user.role === 'cashier' || user.role === 'manager')) ||
+                             allowed_modules.some(g => g.permission_id === mod.id);
+            if (hasGrant) {
+        %>
+              <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 30px;">
+                  <a href="/<%= mod.id %>" class="thumbnail" style="padding: 20px; text-decoration: none; display: block; border-radius: 8px; transition: transform 0.2s, box-shadow 0.2s; min-height: 180px;">
+                      <img src="/images/menubar/<%= mod.icon %>" alt="<%= mod.label %>" style="width: 64px; height: 64px; margin-bottom: 15px;">
+                      <h4 style="color: #2c3e50; font-weight: bold; margin-bottom: 5px;"><%= mod.label %></h4>
+                      <p class="text-muted" style="font-size: 12px; margin-bottom: 0;"><%= mod.desc %></p>
+                  </a>
+                  <style>
+                      .thumbnail:hover {
+                          transform: translateY(-5px);
+                          box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+                      }
+                  </style>
+              </div>
+        <% 
+            }
+          });
+        %>
+    </div>
+</div>
+
+<%- include('partial/footer') %>

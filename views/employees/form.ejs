@@ -1,0 +1,230 @@
+<div class="modal-header modal-header-custom">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white; opacity: 0.8;">&times;</button>
+    <h4 class="modal-title" id="myModalLabel"><%= id === '-1' ? 'New Employee' : 'Edit Employee' %></h4>
+</div>
+
+<form id="employee-form" action="/employees/save/<%= id %>" method="POST" class="form-horizontal">
+    <div class="modal-body">
+        <ul class="nav nav-tabs" id="employee-tabs" role="tablist">
+            <li class="active"><a href="#personal-info" data-toggle="tab">Personal Info</a></li>
+            <li><a href="#login-info" data-toggle="tab">Login</a></li>
+            <li><a href="#permission-info" data-toggle="tab">Permissions</a></li>
+        </ul>
+
+        <div class="tab-content" style="margin-top: 20px;">
+            <!-- Personal Info Tab -->
+            <div class="tab-pane active" id="personal-info">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">First Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="first_name" class="form-control" value="<%= employee.first_name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Last Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="last_name" class="form-control" value="<%= employee.last_name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Gender:</label>
+                    <div class="col-sm-9">
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" value="0" <%= (employee.gender === 0 || !employee.gender) ? 'checked' : '' %>> Male
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" value="1" <%= employee.gender === 1 ? 'checked' : '' %>> Female
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Email:</label>
+                    <div class="col-sm-9">
+                        <input type="email" name="email" class="form-control" value="<%= employee.email || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Phone:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="phone_number" class="form-control" value="<%= employee.phone_number || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Address 1:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="address_1" class="form-control" value="<%= employee.address_1 || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Address 2:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="address_2" class="form-control" value="<%= employee.address_2 || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">City:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="city" class="form-control" value="<%= employee.city || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">State:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="state" class="form-control" value="<%= employee.state || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Zip:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="zip" class="form-control" value="<%= employee.zip || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Country:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="country" class="form-control" value="<%= employee.country || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Comments:</label>
+                    <div class="col-sm-9">
+                        <textarea name="comments" class="form-control" rows="3"><%= employee.comments || '' %></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Credentials Tab -->
+            <div class="tab-pane" id="login-info">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Username:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="username" class="form-control" required value="<%= employee.username || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Password:</label>
+                    <div class="col-sm-9">
+                        <input type="password" name="password" class="form-control" <%= id === '-1' ? 'required' : '' %> placeholder="<%= id === '-1' ? 'Enter password' : 'Leave blank to keep current' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Role:</label>
+                    <div class="col-sm-9">
+                        <select name="role" id="employee-role" class="form-control">
+                            <option value="cashier" <%= employee.role === 'cashier' ? 'selected' : '' %>>Cashier</option>
+                            <option value="manager" <%= employee.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                            <option value="admin" <%= employee.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                            <option value="stocker" <%= employee.role === 'stocker' ? 'selected' : '' %>>Stocker</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Tab -->
+            <div class="tab-pane" id="permission-info">
+                <p class="help-block">Select the modules this employee has access to:</p>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Grant</th>
+                                <th>Module</th>
+                                <th>Menu Group</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% 
+                              const grants = employee.grants || [];
+                              allModules.forEach(mod => {
+                                const hasGrant = grants.some(g => g.permission_id === mod.id);
+                                const currentGrant = grants.find(g => g.permission_id === mod.id);
+                                const currentGroup = currentGrant ? currentGrant.menu_group : 'home';
+                            %>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" name="permissions" value="<%= mod.id %>" <%= hasGrant ? 'checked' : '' %>>
+                                    </td>
+                                    <td>
+                                        <strong><%= mod.label %></strong>
+                                    </td>
+                                    <td>
+                                        <select name="menu_group_<%= mod.id %>" class="form-control input-sm" style="max-width: 150px;">
+                                            <option value="home" <%= currentGroup === 'home' ? 'selected' : '' %>>Home</option>
+                                            <option value="office" <%= currentGroup === 'office' ? 'selected' : '' %>>Office</option>
+                                            <option value="both" <%= currentGroup === 'both' ? 'selected' : '' %>>Both</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+<script>
+  $(document).ready(function() {
+    // Role change auto-permissions
+    $('#employee-role').change(function() {
+      const role = $(this).val();
+      const $checkboxes = $('#permission-info input[type="checkbox"]');
+      
+      $checkboxes.prop('checked', false);
+      
+      if (role === 'admin') {
+        $checkboxes.prop('checked', true);
+      } else if (role === 'manager') {
+        $checkboxes.each(function() {
+          const val = $(this).val();
+          if (val !== 'employees' && val !== 'config') {
+            $(this).prop('checked', true);
+          }
+        });
+      } else if (role === 'cashier') {
+        $checkboxes.each(function() {
+          const val = $(this).val();
+          if (val === 'sales' || val === 'customers' || val === 'giftcards') {
+            $(this).prop('checked', true);
+          }
+        });
+      } else if (role === 'stocker') {
+        $checkboxes.each(function() {
+          const val = $(this).val();
+          if (val === 'items' || val === 'item_kits' || val === 'suppliers' || val === 'receivings') {
+            $(this).prop('checked', true);
+          }
+        });
+      }
+    });
+
+    $('#employee-form').submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $('#myModal').modal('hide');
+            $('#table').bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        },
+        error: function(err) {
+          show_feedback('danger', 'Server error saving employee', 'Error');
+        }
+      });
+    });
+  });
+</script>

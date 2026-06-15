@@ -1,0 +1,180 @@
+<%- include('../partial/header') %>
+
+<div class="col-md-12">
+    <div id="db-titlebar" class="page-header" style="margin-top: 0;">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="margin: 0;"><i class="glyphicon glyphicon-tag"></i> Items Management</h3>
+            </div>
+            <div class="col-md-6 text-right">
+                <a href="/items/view/-1" class="btn btn-primary modal-dlg" title="New Item">
+                    <span class="glyphicon glyphicon-tag"></span> New Item
+                </a>
+                <a href="/items/export" class="btn btn-default" title="Export CSV">
+                    <span class="glyphicon glyphicon-export"></span> Export CSV
+                </a>
+                <form id="import-csv-form" action="/items/import" method="POST" enctype="multipart/form-data" style="display:inline-block; margin-left: 0px;">
+                    <label class="btn btn-default" style="margin-bottom:0; font-weight: normal;" title="Import CSV">
+                        <span class="glyphicon glyphicon-import"></span> Import CSV
+                        <input type="file" name="csv_file" accept=".csv" style="display:none;" onchange="uploadCSV(this)">
+                    </label>
+                </form>
+                <button id="bulk-barcodes-btn" class="btn btn-default" title="Generate Barcodes Sheet">
+                    <span class="glyphicon glyphicon-barcode"></span> Bulk Barcodes
+                </button>
+                <button id="delete-btn" class="btn btn-default" title="Delete Selected">
+                    <span class="glyphicon glyphicon-trash"></span> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div id="toolbar">
+        <div class="form-inline" role="form">
+            <input id="search-box" class="form-control" type="text" placeholder="Search..." style="min-width: 250px;">
+        </div>
+    </div>
+
+    <table id="table"
+           data-toggle="table"
+           data-url="/items/search"
+           data-side-pagination="server"
+           data-pagination="true"
+           data-page-size="25"
+           data-page-list="[10, 25, 50, 100]"
+           data-sort-name="name"
+           data-sort-order="asc"
+           data-toolbar="#toolbar"
+           data-click-to-select="true"
+           data-select-item-name="select_item"
+           data-id-field="item_id">
+        <thead>
+            <tr>
+                <th data-field="select" data-checkbox="true"></th>
+                <th data-field="name" data-sortable="true">Item Name</th>
+                <th data-field="category" data-sortable="true">Category</th>
+                <th data-field="item_number" data-sortable="true">UPC/EAN/SKU</th>
+                <th data-field="cost_price" data-sortable="true" data-align="right">Cost Price</th>
+                <th data-field="unit_price" data-sortable="true" data-align="right">Unit Price</th>
+                <th data-field="quantity" data-sortable="false" data-align="center">Qty In Stock</th>
+                <th data-field="supplier_name" data-sortable="false">Supplier</th>
+                <th data-field="buttons" data-halign="center" data-align="center">Actions</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- Modal Dialog Container -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Form loaded here via AJAX -->
+        </div>
+    </div>
+</div>
+
+<%- include('../partial/footer') %>
+
+<script>
+  $(document).ready(function() {
+    const $table = $('#table');
+    const $searchBox = $('#search-box');
+    const $deleteBtn = $('#delete-btn');
+    const $modal = $('#myModal');
+
+    // Search keyup
+    let searchTimeout = null;
+    $searchBox.on('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function() {
+        $table.bootstrapTable('refresh', {
+          query: {
+            search: $searchBox.val()
+          }
+        });
+      }, 500);
+    });
+
+    // Custom query params for server-side search
+    $table.bootstrapTable('refreshOptions', {
+      queryParams: function(params) {
+        return {
+          limit: params.limit,
+          offset: params.offset,
+          sort: params.sort,
+          order: params.order,
+          search: $searchBox.val()
+        };
+      }
+    });
+
+    // Modal loader for edit/create/inventory
+    $(document).on('click', '.modal-dlg, a.modal-dlg', function(e) {
+      e.preventDefault();
+      const url = $(this).attr('href');
+      
+      $.get(url, function(data) {
+        $modal.find('.modal-content').html(data);
+        $modal.modal('show');
+      });
+    });
+
+    // Delete selected
+    $deleteBtn.click(function() {
+      const selections = $table.bootstrapTable('getSelections');
+      if (selections.length === 0) {
+        show_feedback('danger', 'Please select at least one item', 'Error');
+        return;
+      }
+
+      if (confirm('Are you sure you want to delete the selected items?')) {
+        const ids = selections.map(row => row.item_id);
+        $.post('/items/delete', { ids }, function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $table.bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        }, 'json');
+      }
+    });
+
+    // Bulk barcodes click handler
+    $('#bulk-barcodes-btn').click(function() {
+      const selections = $table.bootstrapTable('getSelections');
+      if (selections.length === 0) {
+        show_feedback('danger', 'Please select at least one item to generate barcodes', 'Error');
+        return;
+      }
+      const ids = selections.map(row => row.item_id).join(',');
+      window.open('/items/bulk_barcodes?ids=' + ids, '_blank');
+    });
+  });
+
+  function uploadCSV(input) {
+    if (input.files && input.files[0]) {
+      const formData = new FormData($('#import-csv-form')[0]);
+      $.ajax({
+        url: '/items/import',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(res) {
+          if (res.success) {
+            show_feedback('success', res.message, 'Success');
+            $('#table').bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', res.message, 'Error');
+          }
+        },
+        error: function(err) {
+          show_feedback('danger', 'Error importing CSV: ' + err.statusText, 'Error');
+        }
+      });
+    }
+  }
+</script>

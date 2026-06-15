@@ -1,0 +1,134 @@
+<%- include('../partial/header') %>
+
+<div class="col-md-12">
+    <div id="db-titlebar" class="page-header" style="margin-top: 0;">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="margin: 0;"><i class="glyphicon glyphicon-usd"></i> Expenses Management</h3>
+            </div>
+            <div class="col-md-6 text-right">
+                <a href="/expenses/categories" class="btn btn-default" title="Manage Categories">
+                    <span class="glyphicon glyphicon-list"></span> Categories
+                </a>
+                <a href="/expenses/view/-1" class="btn btn-primary modal-dlg" title="New Expense">
+                    <span class="glyphicon glyphicon-plus"></span> New Expense
+                </a>
+                <button id="delete-btn" class="btn btn-default" title="Delete Selected">
+                    <span class="glyphicon glyphicon-trash"></span> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div id="toolbar">
+        <div class="form-inline" role="form">
+            <input id="search-box" class="form-control" type="text" placeholder="Search description..." style="min-width: 250px;">
+        </div>
+    </div>
+
+    <table id="table"
+           data-toggle="table"
+           data-url="/expenses/search"
+           data-side-pagination="server"
+           data-pagination="true"
+           data-page-size="25"
+           data-page-list="[10, 25, 50, 100]"
+           data-sort-name="date"
+           data-sort-order="desc"
+           data-toolbar="#toolbar"
+           data-click-to-select="true"
+           data-select-item-name="select_item"
+           data-id-field="expense_id">
+        <thead>
+            <tr>
+                <th data-field="select" data-checkbox="true"></th>
+                <th data-field="date" data-sortable="true">Date</th>
+                <th data-field="amount" data-sortable="true" data-align="right">Amount</th>
+                <th data-field="payment_type" data-sortable="true">Payment Type</th>
+                <th data-field="category_name" data-sortable="false">Category</th>
+                <th data-field="description" data-sortable="true">Description</th>
+                <th data-field="employee_name" data-sortable="false">Created By</th>
+                <th data-field="buttons" data-halign="center" data-align="center">Actions</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- Modal Dialog Container -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Form loaded here via AJAX -->
+        </div>
+    </div>
+</div>
+
+<%- include('../partial/footer') %>
+
+<script>
+  $(document).ready(function() {
+    const $table = $('#table');
+    const $searchBox = $('#search-box');
+    const $deleteBtn = $('#delete-btn');
+    const $modal = $('#myModal');
+
+    // Search keyup
+    let searchTimeout = null;
+    $searchBox.on('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function() {
+        $table.bootstrapTable('refresh', {
+          query: {
+            search: $searchBox.val()
+          }
+        });
+      }, 500);
+    });
+
+    // Custom query params for server-side search
+    $table.bootstrapTable('refreshOptions', {
+      queryParams: function(params) {
+        return {
+          limit: params.limit,
+          offset: params.offset,
+          sort: params.sort,
+          order: params.order,
+          search: $searchBox.val()
+        };
+      }
+    });
+
+    // Modal loader for edit/create
+    $(document).on('click', '.modal-dlg, a.modal-dlg', function(e) {
+      e.preventDefault();
+      const url = $(this).attr('href');
+      
+      $.get(url, function(data) {
+        $modal.find('.modal-content').html(data);
+        $modal.modal('show');
+      });
+    });
+
+    // Delete selected
+    $deleteBtn.click(function() {
+      const selections = $table.bootstrapTable('getSelections');
+      if (selections.length === 0) {
+        show_feedback('danger', 'Please select at least one expense', 'Error');
+        return;
+      }
+
+      if (confirm('Are you sure you want to delete the selected expenses?')) {
+        const ids = selections.map(row => row.expense_id);
+        $.post('/expenses/delete', { ids }, function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $table.bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        }, 'json');
+      }
+    });
+  });
+</script>

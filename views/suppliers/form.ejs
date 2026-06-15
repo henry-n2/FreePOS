@@ -1,0 +1,150 @@
+<div class="modal-header modal-header-custom">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white; opacity: 0.8;">&times;</button>
+    <h4 class="modal-title" id="myModalLabel"><%= id === '-1' ? 'New Supplier' : 'Edit Supplier' %></h4>
+</div>
+
+<form id="supplier-form" action="/suppliers/save/<%= id %>" method="POST" class="form-horizontal">
+    <div class="modal-body">
+        <ul class="nav nav-tabs" id="supplier-tabs" role="tablist">
+            <li class="active"><a href="#personal-info" data-toggle="tab">Personal Info</a></li>
+            <li><a href="#supplier-info" data-toggle="tab">Supplier Info</a></li>
+        </ul>
+
+        <div class="tab-content" style="margin-top: 20px;">
+            <!-- Personal Info Tab -->
+            <div class="tab-pane active" id="personal-info">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">First Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="first_name" class="form-control" value="<%= supplier.first_name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Last Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="last_name" class="form-control" value="<%= supplier.last_name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Gender:</label>
+                    <div class="col-sm-9">
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" value="0" <%= (supplier.gender === 0 || !supplier.gender) ? 'checked' : '' %>> Male
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" value="1" <%= supplier.gender === 1 ? 'checked' : '' %>> Female
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Email:</label>
+                    <div class="col-sm-9">
+                        <input type="email" name="email" class="form-control" value="<%= supplier.email || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Phone:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="phone_number" class="form-control" value="<%= supplier.phone_number || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Address 1:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="address_1" class="form-control" value="<%= supplier.address_1 || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Address 2:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="address_2" class="form-control" value="<%= supplier.address_2 || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">City:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="city" class="form-control" value="<%= supplier.city || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">State:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="state" class="form-control" value="<%= supplier.state || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Zip:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="zip" class="form-control" value="<%= supplier.zip || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Country:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="country" class="form-control" value="<%= supplier.country || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Comments:</label>
+                    <div class="col-sm-9">
+                        <textarea name="comments" class="form-control" rows="3"><%= supplier.comments || '' %></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supplier Info Tab -->
+            <div class="tab-pane" id="supplier-info">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Company Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="company_name" class="form-control" required value="<%= supplier.company_name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Agency Name:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="agency_name" class="form-control" value="<%= supplier.agency_name || '' %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Account Number:</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="account_number" class="form-control" value="<%= supplier.account_number || '' %>">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+<script>
+  $(document).ready(function() {
+    $('#supplier-form').submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $('#myModal').modal('hide');
+            $('#table').bootstrapTable('refresh');
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        },
+        error: function(err) {
+          show_feedback('danger', 'Server error saving supplier', 'Error');
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sales Receipt #<%= sale.invoice_number %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css">
+    <style>
+        body {
+            background-color: white;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            color: <%= config.invoice_text_color || '#333333' %>;
+        }
+        #receipt-wrapper {
+            max-width: 400px;
+            margin: 0 auto;
+            border: 1px dashed #ccc;
+            padding: 15px;
+        }
+        .header, .footer {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .table-receipt th, .table-receipt td {
+            font-size: 12px;
+            padding: 4px 0 !important;
+            border-top: none !important;
+        }
+        .border-double {
+            border-top: 3px double <%= config.invoice_primary_color || '#2c3e50' %>;
+            margin-top: 10px;
+            padding-top: 5px;
+        }
+        .btn-primary {
+            background-color: <%= config.invoice_primary_color || '#2c3e50' %> !important;
+            border-color: <%= config.invoice_primary_color || '#2c3e50' %> !important;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            #receipt-wrapper {
+                border: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print text-center" style="margin-bottom: 20px;">
+        <button onclick="window.print()" class="btn btn-primary"><i class="glyphicon glyphicon-print"></i> Print Receipt</button>
+        <a href="/sales" class="btn btn-default"><i class="glyphicon glyphicon-shopping-cart"></i> Return to Register</a>
+    </div>
+
+    <div id="receipt-wrapper">
+        <div class="header">
+            <% if (config.invoice_show_logo !== '0') { %>
+                <h3><strong><%= config.company || 'FreePOS' %></strong></h3>
+            <% } %>
+            <p><%= config.address || '123 Nowhere Street' %></p>
+            <p>Phone: <%= config.phone || '555-555-5555' %></p>
+            <% if (config.receipt_header_msg) { %>
+                <p style="font-style: italic; font-size: 11px; margin-top: 5px;"><%= config.receipt_header_msg %></p>
+            <% } %>
+        </div>
+
+        <table class="table table-receipt">
+            <tbody>
+                <tr>
+                    <td>Date:</td>
+                    <td class="text-right"><%= sale.sale_time.toLocaleString() %></td>
+                </tr>
+                <tr>
+                    <td>Sale ID:</td>
+                    <td class="text-right"><%= sale._id.toString().substring(18) %></td>
+                </tr>
+                <tr>
+                    <td>Employee:</td>
+                    <td class="text-right"><%= sale.employee ? `${sale.employee.first_name} ${sale.employee.last_name}` : 'Unknown' %></td>
+                </tr>
+                <% if (sale.customer) { %>
+                    <tr>
+                        <td>Customer:</td>
+                        <td class="text-right"><strong><%= sale.customer.first_name %> <%= sale.customer.last_name %></strong></td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <table class="table table-receipt" style="border-top: 1px dashed #000;">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="text-right">Qty</th>
+                    <th class="text-right">Price</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                  let subtotal = 0;
+                  sale.items.forEach(line => {
+                    const lineSub = line.item_unit_price * line.quantity_purchased * (1 - line.discount_percent / 100);
+                    subtotal += lineSub;
+                %>
+                    <tr>
+                        <td>
+                            <%= line.item.name %>
+                            <% if (line.discount_percent > 0) { %>
+                                <br><small class="text-muted">Discount: <%= line.discount_percent %>%</small>
+                            <% } %>
+                            <% if (line.serialnumber) { %>
+                                <br><small class="text-muted">S/N: <%= line.serialnumber %></small>
+                            <% } %>
+                        </td>
+                        <td class="text-right"><%= line.quantity_purchased %></td>
+                        <td class="text-right">$<%= line.item_unit_price.toFixed(2) %></td>
+                        <td class="text-right">$<%= lineSub.toFixed(2) %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <div class="border-double">
+            <table class="table table-receipt">
+                <tbody>
+                    <tr>
+                        <td>Subtotal:</td>
+                        <td class="text-right">$<%= subtotal.toFixed(2) %></td>
+                    </tr>
+                    <% 
+                      let taxTotal = 0;
+                      sale.taxes.forEach(tax => {
+                        const taxAmt = subtotal * (tax.percent / 100);
+                        taxTotal += taxAmt;
+                    %>
+                        <tr>
+                            <td><%= tax.name %> (<%= tax.percent %>%):</td>
+                            <td class="text-right">$<%= taxAmt.toFixed(2) %></td>
+                        </tr>
+                    <% }); %>
+                    <tr style="font-weight: bold; font-size: 14px; color: <%= config.invoice_primary_color || '#2c3e50' %>;">
+                        <td>TOTAL:</td>
+                        <td class="text-right">$<%= (subtotal + taxTotal).toFixed(2) %></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="border-top: 1px dashed #000; padding-top: 5px;">
+            <table class="table table-receipt">
+                <tbody>
+                    <% 
+                      let totalPayments = 0;
+                      sale.payments.forEach(p => {
+                        totalPayments += p.payment_amount;
+                    %>
+                        <tr>
+                            <td>Payment (<%= p.payment_type %>):</td>
+                            <td class="text-right">$<%= p.payment_amount.toFixed(2) %></td>
+                        </tr>
+                    <% }); %>
+                    <% 
+                       const grandTotal = subtotal + taxTotal;
+                       const change = totalPayments - grandTotal;
+                       if (change > 0) {
+                    %>
+                        <tr style="font-weight: bold;">
+                            <td>Change Due:</td>
+                            <td class="text-right">$<%= change.toFixed(2) %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p style="font-size: 11px; margin-top: 15px;"><%= config.receipt_footer_msg || config.return_policy || 'Thank you for shopping with us!' %></p>
+        </div>
+
+        <% if (config.invoice_show_barcode === '1') { %>
+            <div style="text-align: center; margin-top: 20px;">
+                <svg id="receipt-barcode" style="max-height: 50px;"></svg>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+            <script>
+                JsBarcode("#receipt-barcode", "<%= sale.invoice_number %>", {
+                    format: "CODE128",
+                    width: 1.5,
+                    height: 35,
+                    displayValue: true,
+                    fontSize: 10,
+                    lineColor: "<%= config.barcode_line_color || '#000000' %>",
+                    background: "<%= config.barcode_background || '#ffffff' %>"
+                });
+            </script>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<%- include('../partial/header') %>
+
+<div class="col-md-12">
+    <div class="page-header" style="margin-top: 0;">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="margin: 0;"><i class="glyphicon glyphicon-list-alt"></i> <%= reportData.title %></h3>
+            </div>
+            <div class="col-md-6 text-right">
+                <button onclick="window.print()" class="btn btn-default"><span class="glyphicon glyphicon-print"></span> Print</button>
+                <a href="/reports" class="btn btn-primary"><span class="glyphicon glyphicon-arrow-left"></span> Back to Reports</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Block -->
+    <% if (Object.keys(reportData.summary).length > 0) { %>
+        <div class="row" style="margin-bottom: 30px;">
+            <% for (const [label, val] of Object.entries(reportData.summary)) { %>
+                <div class="col-md-3">
+                    <div class="panel panel-default text-center" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); padding: 15px 0;">
+                        <h4 class="text-muted" style="margin: 0 0 10px 0; font-size: 14px;"><%= label %></h4>
+                        <h2 style="margin: 0; color: #2c3e50; font-weight: bold;"><%= val %></h2>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+
+    <!-- Tabular Data Table -->
+    <div class="panel panel-default" style="border-radius: 8px;">
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+                <tr>
+                    <% reportData.headers.forEach(h => { %>
+                        <th><%= h %></th>
+                    <% }); %>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (reportData.rows.length === 0) { %>
+                    <tr>
+                        <td colspan="<%= reportData.headers.length %>" class="text-center text-muted" style="padding: 30px;">No records found for the selected date range.</td>
+                    </tr>
+                <% } else { %>
+                    <% reportData.rows.forEach(row => { %>
+                        <tr>
+                            <% row.forEach(col => { %>
+                                <td><%= col %></td>
+                            <% }); %>
+                        </tr>
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partial/footer') %>

@@ -1,0 +1,77 @@
+            </div> <!-- /.row -->
+        </div> <!-- /.container -->
+
+        <div class="footer">
+            <div class="container">
+                <p>You are using <strong>FreePOS Node.js Edition v1.0.0</strong> - database: MongoDB.</p>
+                <p>&copy; <%= new Date().getFullYear() %> FreePOS. Developed by Ujjal Bhattacharya, 2026.</p>
+            </div>
+        </div>
+    </div> <!-- /.wrapper -->
+
+    <!-- Load CDN Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/extensions/export/bootstrap-table-export.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <!-- Custom Helper Script (mimicking FreePOS manage_tables.js helpers) -->
+    <script>
+      // Global clock update
+      setInterval(function() {
+        const liveClock = document.getElementById('liveclock');
+        if (liveClock) {
+          liveClock.innerHTML = new Date().toLocaleString();
+        }
+      }, 1000);
+
+      // Flash message alerts helper
+      function show_feedback(type, message, title) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const alertHtml = `
+          <div class="alert ${alertClass} alert-dismissible" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>${title || 'Notification'}:</strong> ${message}
+          </div>
+        `;
+        $('body').append(alertHtml);
+        setTimeout(function() {
+          $('.alert').fadeOut('slow', function() { $(this).remove(); });
+        }, 3000);
+      }
+
+      // Theme toggle script
+      $(document).ready(function() {
+        const $themeLink = $('#bootswatch-theme');
+        const $toggleBtn = $('#theme-toggle');
+        const defaultTheme = '<%= typeof config !== "undefined" ? (config.theme || "flatly") : "flatly" %>';
+        const currentTheme = localStorage.getItem('pos-theme') || defaultTheme;
+
+        function applyTheme(themeName) {
+          let url = `https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/${themeName}/bootstrap.min.css`;
+          $themeLink.attr('href', url);
+          if (themeName === 'darkly') {
+            $toggleBtn.html('<i class="fa fa-sun-o"></i> Light Mode');
+          } else {
+            $toggleBtn.html('<i class="fa fa-moon-o"></i> Dark Mode');
+          }
+        }
+
+        // Initial apply
+        applyTheme(currentTheme);
+
+        $toggleBtn.click(function(e) {
+          e.preventDefault();
+          let activeTheme = localStorage.getItem('pos-theme') || defaultTheme;
+          let newTheme = activeTheme === 'darkly' ? defaultTheme : 'darkly';
+          localStorage.setItem('pos-theme', newTheme);
+          applyTheme(newTheme);
+        });
+      });
+    </script>
+</body>
+</html>

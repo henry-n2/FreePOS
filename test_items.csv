@@ -1,0 +1,3 @@
+Item Name,Category,UPC/EAN/SKU,Description,Cost Price,Unit Price,Reorder Level
+"CSV Imported Item A","Gizmos","1122334455","An imported test item A",10.50,19.99,5
+"CSV Imported Item B","Widgets","6677889900","Another imported test item B",5.00,9.99,10

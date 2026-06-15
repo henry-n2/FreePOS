@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Permission Denied</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d9534f;
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="glyphicon glyphicon-remove-sign"></i></h1>
+        <h3>Access Denied / Not Found</h3>
+        <p class="text-muted"><%= typeof message !== 'undefined' ? message : "You do not have permission to access this module." %></p>
+        <br>
+        <a href="/" class="btn btn-primary btn-lg">Return to Home</a>
+    </div>
+</body>
+</html>

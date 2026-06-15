@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title><%= config.company || 'FreePOS' %> | Node.js FreePOS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Bootswatch CDN - dynamically loading theme from database config -->
+    <% 
+       const theme = config.theme || 'flatly';
+       const bootswatchUrl = `https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/${theme}/bootstrap.min.css`;
+    %>
+    <link id="bootswatch-theme" rel="stylesheet" href="<%= bootswatchUrl %>">
+    
+    <!-- jQuery UI & Extensions -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <style>
+        html {
+            overflow: auto;
+        }
+        body {
+            padding-top: 0px;
+        }
+        .topbar {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+        .topbar a {
+            color: #ecf0f1;
+            text-decoration: none;
+        }
+        .topbar a:hover {
+            text-decoration: underline;
+        }
+        .navbar-default {
+            margin-bottom: 20px;
+            border-radius: 0;
+        }
+        .menu-icon {
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .menu-icon img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 4px;
+        }
+        .nav > li > a.menu-icon {
+            padding-top: 10px;
+            padding-bottom: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding: 20px 0;
+            border-top: 1px solid #e7e7e7;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .modal-header-custom {
+            background-color: #2c3e50;
+            color: white;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="topbar">
+            <div class="container">
+                <div class="pull-left">
+                    <div id="liveclock" style="display:inline-block;"><%= new Date().toLocaleString() %></div>
+                    <a href="#" id="theme-toggle" style="margin-left: 20px; color: #ecf0f1; text-decoration:none;"><i class="fa fa-moon-o"></i> Dark Mode</a>
+                </div>
+
+                <div class="pull-right">
+                    <% if (user) { %>
+                        <strong><%= user.first_name %> <%= user.last_name %></strong>
+                        <span>&nbsp;|&nbsp;</span>
+                        <a href="/logout"><%= lang('Login.logout', 'Logout') %></a>
+                    <% } %>
+                </div>
+
+                <div class="text-center" style="margin: 0 auto; width: fit-content;">
+                    <strong><%= config.company || 'FreePOS' %></strong>
+                </div>
+            </div>
+        </div>
+
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">FreePOS</a>
+                </div>
+
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <% if (user) { %>
+                            <!-- Home button -->
+                            <li>
+                                <a href="/" title="Home" class="menu-icon">
+                                    <img src="/images/menubar/home.svg" alt="Home"><br>
+                                    Home
+                                </a>
+                            </li>
+
+                            <!-- Allowed modules list -->
+                            <% 
+                              // FreePOS modules
+                              const allModules = [
+                                { id: 'customers', label: 'Customers', icon: 'customers.svg' },
+                                { id: 'items', label: 'Items', icon: 'items.svg' },
+                                { id: 'item_kits', label: 'Item Kits', icon: 'item_kits.svg' },
+                                { id: 'suppliers', label: 'Suppliers', icon: 'suppliers.svg' },
+                                { id: 'reports', label: 'Reports', icon: 'reports.svg' },
+                                { id: 'receivings', label: 'Receivings', icon: 'receivings.svg' },
+                                { id: 'sales', label: 'Sales', icon: 'sales.svg' },
+                                { id: 'employees', label: 'Employees', icon: 'employees.svg' },
+                                { id: 'giftcards', label: 'Gift Cards', icon: 'giftcards.svg' },
+                                { id: 'expenses', label: 'Expenses', icon: 'expenses.svg' },
+                                { id: 'config', label: 'Settings', icon: 'config.svg' }
+                              ];
+                              
+                              allModules.forEach(mod => {
+                                // Sales panel only visible for cashier, manager, and admin roles
+                                if (mod.id === 'sales' && !['admin', 'manager', 'cashier'].includes(user.role)) {
+                                  return;
+                                }
+                                const hasGrant = user.username === 'admin' || 
+                                                 user.role === 'admin' ||
+                                                 (mod.id === 'sales' && (user.role === 'cashier' || user.role === 'manager')) ||
+                                                 allowed_modules.some(g => g.permission_id === mod.id);
+                                if (hasGrant) {
+                            %>
+                                  <li>
+                                      <a href="/<%= mod.id %>" title="<%= mod.label %>" class="menu-icon">
+                                          <img src="/images/menubar/<%= mod.icon %>" alt="<%= mod.label %>"><br>
+                                          <%= mod.label %>
+                                      </a>
+                                  </li>
+                            <% 
+                                }
+                              });
+                            %>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row">

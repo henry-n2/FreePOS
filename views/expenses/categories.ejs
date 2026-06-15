@@ -1,0 +1,116 @@
+<%- include('../partial/header') %>
+
+<div class="col-md-12">
+    <div class="page-header" style="margin-top: 0;">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="margin: 0;"><i class="glyphicon glyphicon-list"></i> Expense Categories</h3>
+            </div>
+            <div class="col-md-6 text-right">
+                <a href="/expenses" class="btn btn-default">
+                    <span class="glyphicon glyphicon-arrow-left"></span> Return to Expenses
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Add Category Form -->
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Add Category</h3>
+                </div>
+                <div class="panel-body">
+                    <form id="category-form" action="/expenses/categories/save/-1" method="POST">
+                        <div class="form-group">
+                            <label>Category Name:</label>
+                            <input type="text" name="name" class="form-control" required placeholder="Name (e.g. Utilities)">
+                        </div>
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Category description..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Add Category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories List -->
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Existing Categories</h3>
+                </div>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th style="width: 100px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% categories.forEach(cat => { %>
+                            <tr data-id="<%= cat._id %>">
+                                <td><strong><%= cat.name %></strong></td>
+                                <td><%= cat.description %></td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-xs btn-danger delete-cat-btn" data-id="<%= cat._id %>">
+                                        <i class="glyphicon glyphicon-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partial/footer') %>
+
+<script>
+  $(document).ready(function() {
+    // Save Category via AJAX
+    $('#category-form').submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            setTimeout(function() { location.reload(); }, 1000);
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        },
+        error: function(err) {
+          show_feedback('danger', 'Server error saving category', 'Error');
+        }
+      });
+    });
+
+    // Delete Category via AJAX
+    $('.delete-cat-btn').click(function() {
+      const id = $(this).data('id');
+      if (confirm('Are you sure you want to delete this category?')) {
+        $.post('/expenses/categories/delete', { id }, function(response) {
+          if (response.success) {
+            show_feedback('success', response.message, 'Success');
+            $(`tr[data-id="${id}"]`).remove();
+          } else {
+            show_feedback('danger', response.message, 'Error');
+          }
+        }, 'json');
+      }
+    });
+  });
+</script>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sales Invoice #<%= sale.invoice_number %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css">
+    <style>
+        body {
+            background-color: white;
+            padding: 40px;
+            color: <%= config.invoice_text_color || '#555555' %>;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+            padding: 30px;
+            font-size: 14px;
+            line-height: 24px;
+        }
+        .text-primary-custom {
+            color: <%= config.invoice_primary_color || '#2c3e50' %> !important;
+        }
+        .table-header-custom {
+            background-color: <%= config.invoice_primary_color || '#2c3e50' %> !important;
+            color: white !important;
+        }
+        .btn-primary {
+            background-color: <%= config.invoice_primary_color || '#2c3e50' %> !important;
+            border-color: <%= config.invoice_primary_color || '#2c3e50' %> !important;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .invoice-box {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print text-center" style="margin-bottom: 20px;">
+        <button onclick="window.print()" class="btn btn-primary"><i class="glyphicon glyphicon-print"></i> Print Invoice</button>
+        <a href="/sales" class="btn btn-default"><i class="glyphicon glyphicon-shopping-cart"></i> Return to Register</a>
+    </div>
+
+    <div class="invoice-box">
+        <div class="row">
+            <div class="col-xs-6">
+                <% if (config.invoice_show_logo !== '0') { %>
+                    <h2 class="text-primary-custom"><strong><%= config.company || 'FreePOS' %></strong></h2>
+                <% } %>
+                <p><%= config.address || '123 Nowhere Street' %></p>
+                <p>Phone: <%= config.phone || '555-555-5555' %></p>
+                <p>Email: <%= config.email || 'company@example.com' %></p>
+            </div>
+            <div class="col-xs-6 text-right">
+                <h1 style="color: #ccc; margin-top: 0; font-weight: bold;"><%= config.invoice_title || 'INVOICE' %></h1>
+                <p><strong>Invoice #:</strong> <%= sale.invoice_number %></p>
+                <p><strong>Date:</strong> <%= sale.sale_time.toLocaleDateString() %></p>
+                <p><strong>Employee:</strong> <%= sale.employee ? `${sale.employee.first_name} ${sale.employee.last_name}` : 'Unknown' %></p>
+            </div>
+        </div>
+
+        <hr style="border-top-color: <%= config.invoice_primary_color || '#eee' %>">
+
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-xs-6">
+                <h4 class="text-primary-custom"><strong>Billed To:</strong></h4>
+                <% if (sale.customer) { %>
+                    <p><strong><%= sale.customer.first_name %> <%= sale.customer.last_name %></strong></p>
+                    <p><%= sale.customer.company_name || 'Individual' %></p>
+                    <p><%= sale.customer.address_1 %> <%= sale.customer.address_2 %></p>
+                    <p><%= sale.customer.city %>, <%= sale.customer.state %> <%= sale.customer.zip %></p>
+                    <p>Phone: <%= sale.customer.phone_number %></p>
+                <% } else { %>
+                    <p>Walk-in Customer / Cash Sale</p>
+                <% } %>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-header-custom">
+                    <th>Item Description</th>
+                    <th class="text-right" style="width: 100px; color: white;">Price</th>
+                    <th class="text-right" style="width: 80px; color: white;">Qty</th>
+                    <th class="text-right" style="width: 100px; color: white;">Discount %</th>
+                    <th class="text-right" style="width: 120px; color: white;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                  let subtotal = 0;
+                  sale.items.forEach(line => {
+                    const lineSub = line.item_unit_price * line.quantity_purchased * (1 - line.discount_percent / 100);
+                    subtotal += lineSub;
+                %>
+                    <tr>
+                        <td>
+                            <strong><%= line.item.name %></strong>
+                            <% if (line.serialnumber) { %>
+                                <br><small class="text-muted">Serial Number: <%= line.serialnumber %></small>
+                            <% } %>
+                            <% if (line.description) { %>
+                                <br><small class="text-muted"><%= line.description %></small>
+                            <% } %>
+                        </td>
+                        <td class="text-right">$<%= line.item_unit_price.toFixed(2) %></td>
+                        <td class="text-right"><%= line.quantity_purchased %></td>
+                        <td class="text-right"><%= line.discount_percent %>%</td>
+                        <td class="text-right">$<%= lineSub.toFixed(2) %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col-xs-6">
+                <% if (sale.comment) { %>
+                    <p><strong>Comments / Special Notes:</strong></p>
+                    <p class="text-muted"><%= sale.comment %></p>
+                <% } %>
+            </div>
+            <div class="col-xs-6">
+                <table class="table table-condensed text-right">
+                    <tbody>
+                        <tr>
+                            <td><strong>Subtotal:</strong></td>
+                            <td>$<%= subtotal.toFixed(2) %></td>
+                        </tr>
+                        <% 
+                          let taxTotal = 0;
+                          sale.taxes.forEach(tax => {
+                            const taxAmt = subtotal * (tax.percent / 100);
+                            taxTotal += taxAmt;
+                        %>
+                            <tr>
+                                <td><strong><%= tax.name %> (<%= tax.percent %>%):</strong></td>
+                                <td>$<%= taxAmt.toFixed(2) %></td>
+                            </tr>
+                        <% }); %>
+                        <tr style="font-size: 16px; font-weight: bold; background-color: #f7f9fa; color: <%= config.invoice_primary_color || '#2c3e50' %>;">
+                            <td><strong>Total Amount:</strong></td>
+                            <td>$<%= (subtotal + taxTotal).toFixed(2) %></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr style="border-top-color: <%= config.invoice_primary_color || '#eee' %>">
+        
+        <div class="row text-center" style="margin-top: 20px;">
+            <p style="font-size: 12px; font-style: italic;"><%= config.receipt_footer_msg || config.return_policy || 'Thank you for shopping with us!' %></p>
+        </div>
+
+        <% if (config.invoice_show_barcode === '1') { %>
+            <div style="text-align: center; margin-top: 20px;">
+                <svg id="invoice-barcode" style="max-height: 60px;"></svg>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+            <script>
+                JsBarcode("#invoice-barcode", "<%= sale.invoice_number %>", {
+                    format: "CODE128",
+                    width: 2,
+                    height: 45,
+                    displayValue: true,
+                    fontSize: 12,
+                    lineColor: "<%= config.barcode_line_color || '#000000' %>",
+                    background: "<%= config.barcode_background || '#ffffff' %>"
+                });
+            </script>
+        <% } %>
+    </div>
+</body>
+</html>

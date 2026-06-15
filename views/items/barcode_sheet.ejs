@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Bulk Barcode Label Sheet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css">
+    <style>
+        body {
+            background-color: white;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .barcode-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+        .barcode-label {
+            width: 2.2in;
+            height: 1.2in;
+            border: 1px dashed #ccc;
+            margin: 10px;
+            padding: 8px;
+            text-align: center;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            page-break-inside: avoid;
+        }
+        .barcode-name {
+            font-size: 10px;
+            font-weight: bold;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        .barcode-price {
+            font-size: 9px;
+            color: #555;
+            margin: 0;
+        }
+        .barcode-svg {
+            max-height: 48px;
+            max-width: 100%;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                padding: 0;
+            }
+            .barcode-label {
+                border: 1px solid transparent; /* invisible on print */
+                box-shadow: none;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print text-center" style="margin-bottom: 25px;">
+        <button onclick="window.print()" class="btn btn-primary"><span class="glyphicon glyphicon-print"></span> Print Barcode Labels</button>
+        <button onclick="window.close()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Close Window</button>
+    </div>
+
+    <div class="barcode-container">
+        <% items.forEach(item => { %>
+            <% if (item.item_number) { %>
+                <div class="barcode-label">
+                    <p class="barcode-name"><%= item.name %></p>
+                    <svg class="barcode-svg" data-value="<%= item.item_number %>"></svg>
+                    <p class="barcode-price">$<%= item.unit_price.toFixed(2) %></p>
+                </div>
+            <% } %>
+        <% }); %>
+    </div>
+
+    <!-- Load JsBarcode -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script>
+        document.querySelectorAll('.barcode-svg').forEach(svg => {
+            const val = svg.getAttribute('data-value');
+            if (val) {
+                try {
+                    JsBarcode(svg, val, {
+                        format: "CODE128",
+                        lineColor: "<%= config.barcode_line_color || '#000000' %>",
+                        background: "<%= config.barcode_background || '#ffffff' %>",
+                        width: (<%= parseFloat(config.barcode_width) || 2 %>) * 0.75, // scale down slightly for sheet
+                        height: 25,
+                        displayValue: <%= config.barcode_display_value === '0' ? 'false' : 'true' %>,
+                        fontSize: 8
+                    });
+                } catch (err) {
+                    console.error("Error generating bulk barcode for", val, err);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

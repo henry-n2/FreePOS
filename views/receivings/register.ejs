@@ -1,0 +1,198 @@
+<%- include('../partial/header') %>
+
+<div class="col-md-9">
+    <% if (feedback) { %>
+        <div class="alert alert-<%= feedback.type %> alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Notification:</strong> <%= feedback.message %>
+        </div>
+    <% } %>
+
+    <!-- Find Item Search Box -->
+    <div class="panel panel-default" style="border-radius: 8px;">
+        <div class="panel-body">
+            <form action="/receivings/add" method="POST" class="form-inline" id="add-recv-item-form">
+                <div class="form-group" style="width: 80%;">
+                    <input type="text" id="recv-item-lookup" class="form-control" style="width: 100%;" placeholder="Search Item Name or scan Barcode to receive...">
+                    <input type="hidden" name="item_id" id="recv-selected-item-id">
+                </div>
+                <div class="form-group" style="width: 18%; margin-left: 1%;">
+                    <button type="submit" class="btn btn-primary btn-block">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Items Cart Table -->
+    <div class="panel panel-default" style="border-radius: 8px;">
+        <table class="table table-striped table-hover" id="recv-cart-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">Delete</th>
+                    <th>Item Name</th>
+                    <th style="width: 110px;">Cost Price</th>
+                    <th style="width: 110px;">Selling Price</th>
+                    <th style="width: 90px;">Qty.</th>
+                    <th style="width: 90px;">Disc %</th>
+                    <th style="width: 120px; text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (cart.items.length === 0) { %>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted" style="padding: 30px;">Cart is Empty. Scan or lookup items to receive.</td>
+                    </tr>
+                <% } else { %>
+                    <% cart.items.forEach((item, index) => { 
+                       const itemTotal = item.cost_price * item.quantity * (1 - (item.discount_percent || 0) / 100);
+                    %>
+                        <tr>
+                            <td>
+                                <a href="/receivings/delete_item/<%= index %>" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-trash"></i></a>
+                            </td>
+                            <td>
+                                <strong><%= item.name %></strong>
+                            </td>
+                            <td>
+                                <input type="number" name="cost_price" step="0.01" value="<%= item.cost_price %>" class="form-control input-sm inline-edit" data-index="<%= index %>" style="width: 90px; height: 26px;">
+                            </td>
+                            <td>
+                                <input type="number" name="unit_price" step="0.01" value="<%= item.unit_price %>" class="form-control input-sm inline-edit" data-index="<%= index %>" style="width: 90px; height: 26px;">
+                            </td>
+                            <td>
+                                <input type="number" name="quantity" step="0.001" value="<%= item.quantity %>" class="form-control input-sm inline-edit" data-index="<%= index %>" style="width: 70px; height: 26px;">
+                            </td>
+                            <td>
+                                <input type="number" name="discount_percent" step="1" value="<%= item.discount_percent %>" class="form-control input-sm inline-edit" data-index="<%= index %>" style="width: 60px; height: 26px;">
+                            </td>
+                            <td style="text-align: right; font-weight: bold; vertical-align: middle;">
+                                $<%= itemTotal.toFixed(2) %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Right Column: Location, Supplier, Payments, Finalization -->
+<div class="col-md-3">
+    <!-- Stock Location Selector -->
+    <div class="panel panel-default" style="border-radius: 8px;">
+        <div class="panel-body">
+            <form action="/sales/location" method="POST" id="location-form">
+                <label>Stock Location:</label>
+                <select name="location_id" class="form-control" onchange="this.form.submit()">
+                    <% locations.forEach(loc => { %>
+                        <option value="<%= loc.location_id %>" <%= activeLocation === loc.location_id ? 'selected' : '' %>><%= loc.location_name %></option>
+                    <% }); %>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supplier Section -->
+    <div class="panel panel-default" style="border-radius: 8px;">
+        <div class="panel-heading">
+            <h3 class="panel-title"><i class="glyphicon glyphicon-user"></i> Supplier</h3>
+        </div>
+        <div class="panel-body">
+            <% if (!supplier) { %>
+                <form action="/receivings/select_supplier" method="POST" id="supplier-select-form">
+                    <input type="text" id="supplier-lookup" class="form-control" placeholder="Search supplier...">
+                    <input type="hidden" name="supplier_id" id="selected-supplier-id">
+                </form>
+            <% } else { %>
+                <div>
+                    <strong><%= supplier.company_name %></strong>
+                    <br><span class="text-muted"><%= supplier.agency_name %></span>
+                    <br><small><%= supplier.first_name %> <%= supplier.last_name %></small>
+                    <br><br>
+                    <a href="/receivings/remove_supplier" class="btn btn-danger btn-xs btn-block">Remove Supplier</a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Totals panel -->
+    <div class="panel panel-default" style="border-radius: 8px;">
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between" style="background-color: #f7f9fa; font-size: 16px;">
+                <span>Total:</span>
+                <strong class="pull-right text-primary">$<%= total.toFixed(2) %></strong>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Finalization Buttons -->
+    <% if (cart.items.length > 0) { %>
+        <form action="/receivings/complete" method="POST" id="complete-receiving-form">
+            <div class="form-group">
+                <label>Payment Mode:</label>
+                <select name="payment_type" class="form-control input-sm">
+                    <option value="Cash">Cash</option>
+                    <option value="Check">Check</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Credit Card">Credit Card</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Reference # / Invoice #:</label>
+                <input type="text" name="reference" class="form-control input-sm" placeholder="Ref #">
+            </div>
+            <div class="form-group">
+                <textarea name="comment" class="form-control" rows="2" placeholder="Add comment..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-success btn-lg btn-block" style="font-weight: bold;">
+                <span class="glyphicon glyphicon-ok"></span> Complete Receiving
+            </button>
+        </form>
+        <br>
+        <form action="/receivings/cancel" method="POST">
+            <button type="submit" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Are you sure you want to clear this receiving?')">Cancel</button>
+        </form>
+    <% } %>
+</div>
+
+<%- include('../partial/footer') %>
+
+<script>
+  $(document).ready(function() {
+    // Autocomplete for items
+    $('#recv-item-lookup').autocomplete({
+      source: '/items/suggest',
+      minLength: 2,
+      select: function(event, ui) {
+        $('#recv-selected-item-id').val(ui.item.value);
+        $('#add-recv-item-form').submit();
+        return false;
+      }
+    });
+
+    // Autocomplete for supplier selection
+    $('#supplier-lookup').autocomplete({
+      source: '/receivings/suggest_suppliers',
+      minLength: 2,
+      select: function(event, ui) {
+        $('#selected-supplier-id').val(ui.item.value);
+        $('#supplier-select-form').submit();
+        return false;
+      }
+    });
+
+    // Inline edit quantity / prices / discount
+    $('.inline-edit').change(function() {
+      const field = $(this).attr('name');
+      const value = $(this).val();
+      const index = $(this).data('index');
+      
+      const form = $('<form action="/receivings/edit_item/' + index + '" method="POST"></form>');
+      form.append(`<input type="hidden" name="${field}" value="${value}">`);
+      
+      $('body').append(form);
+      form.submit();
+    });
+  });
+</script>
