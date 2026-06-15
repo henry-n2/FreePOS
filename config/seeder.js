@@ -77,7 +77,7 @@ const seedDB = async () => {
         phone_number: '+913939399320',
         grants: grants
       });
-      console.log('Admin user seeded: admin / pointofsale');
+      console.log('Admin user seeded: admin / admin');
     }
   } catch (err) {
     console.error('Seeding error:', err.message);
