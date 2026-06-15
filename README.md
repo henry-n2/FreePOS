@@ -10,7 +10,7 @@
   
   A modern, lightweight **Point-of-Sale (POS)** platform built with Node.js, Express, and MongoDB
   
-  [Live Demo](#) • [Documentation](#documentation) • [Installation](#installation) • [Report Bug](../../issues) • [Request Feature](../../issues)
+ [Documentation](#documentation) • [Installation](#installation) • [Report Bug](../../issues) • [Request Feature](../../issues)
 </div>
 
 ---
