@@ -1,7 +1,6 @@
 <div align="center">
   <img src="public\FreePOS2.png" alt="FreePOS Logo" width="150" height="150">
-  
-  # FreePOS
+
   
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js)](https://nodejs.org)
   [![MongoDB](https://img.shields.io/badge/MongoDB-6+-green?style=flat-square&logo=mongodb)](https://www.mongodb.com)
